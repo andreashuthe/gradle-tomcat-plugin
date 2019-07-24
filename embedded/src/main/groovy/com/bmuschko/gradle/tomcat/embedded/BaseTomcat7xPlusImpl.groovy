@@ -42,7 +42,7 @@ abstract class BaseTomcat7xPlusImpl extends BaseTomcatServerImpl {
 
     @Override
     void createLoader(ClassLoader classLoader) {
-        Class webappLoader = classLoader.loadClass('org.apache.catalina.loader.WebappLoader')
+        final Class webappLoader = classLoader.loadClass('org.apache.catalina.loader.WebappLoader')
         context.loader = webappLoader.newInstance(classLoader)
     }
 
@@ -97,8 +97,8 @@ abstract class BaseTomcat7xPlusImpl extends BaseTomcatServerImpl {
     }
 
     private createConnector(String protocolHandlerClassName, String uriEncoding) {
-        Class connectorClass = loadClass('org.apache.catalina.connector.Connector')
-        Constructor constructor = connectorClass.getConstructor([String] as Class[])
+        final Class connectorClass = loadClass('org.apache.catalina.connector.Connector')
+        final Constructor constructor = connectorClass.getConstructor([String] as Class[])
         def connector = constructor.newInstance([protocolHandlerClassName] as Object[])
         connector.URIEncoding = uriEncoding
         connector

@@ -14,14 +14,17 @@ abstract class BaseTomcatServerImpl implements TomcatServer {
     final tomcat
     def context
     private boolean stopped
+    protected final Logger logger;
 
-    public BaseTomcatServerImpl() {
-        Class serverClass = loadClass(getServerClassName())
+
+    BaseTomcatServerImpl() {
+        this.logger = Logging.getLogger(BaseTomcatServerImpl)
+        final Class serverClass = loadClass(getServerClassName())
         this.tomcat = serverClass.newInstance()
     }
 
     Class loadClass(String className) {
-        ClassLoader classLoader = Thread.currentThread().contextClassLoader
+        final ClassLoader classLoader = Thread.currentThread().contextClassLoader
         classLoader.loadClass(className)
     }
 
@@ -83,7 +86,7 @@ abstract class BaseTomcatServerImpl implements TomcatServer {
 
         @Override
         Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            String methodName = method.getName()
+            final String methodName = method.getName()
 
             if(methodName == 'lifecycleEvent') {
                 def event = args[0]

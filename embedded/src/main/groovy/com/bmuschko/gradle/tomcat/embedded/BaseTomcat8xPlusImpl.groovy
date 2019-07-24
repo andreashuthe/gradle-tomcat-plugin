@@ -14,21 +14,28 @@ abstract class BaseTomcat8xPlusImpl extends BaseTomcat7xPlusImpl {
     @Override
     void createContext(String fullContextPath, String webAppPath) {
         super.createContext(fullContextPath, webAppPath)
-        Class standardRootClass = loadClass('org.apache.catalina.webresources.StandardRoot')
-        Class contextClass = loadClass('org.apache.catalina.Context')
-        Constructor constructor = standardRootClass.getConstructor(contextClass)
+        logger.info "webapp path ${webAppPath}"
+        final Class standardRootClass = loadClass('org.apache.catalina.webresources.StandardRoot')
+        final Class contextClass = loadClass('org.apache.catalina.Context')
+        final Constructor constructor = standardRootClass.getConstructor(contextClass)
         context.resources = constructor.newInstance(context)
-        Class jasperInitializer = loadClass('org.apache.jasper.servlet.JasperInitializer')
+        final Class jasperInitializer = loadClass('org.apache.jasper.servlet.JasperInitializer')
         context.addServletContainerInitializer(jasperInitializer.newInstance(), null)
     }
 
     @Override
     void addWebappResource(File resource) {
-        context.resources.createWebResourceSet(getResourceSetType('PRE'), '/WEB-INF/classes', resource.toURI().toURL(), '/')
+        logger.info "webappres start ${resource.getName()}"
+        if (resource.getName().endsWith(".jar")) {
+            context.resources.createWebResourceSet(getResourceSetType('CLASSES_JAR'), '/WEB-INF/classes', resource.toURI().toURL(), '/')
+        } else {
+            context.resources.createWebResourceSet(getResourceSetType('PRE'), '/WEB-INF/classes', resource.toURI().toURL(), '/')
+        }
+        logger.info "webappres end"
     }
 
     def getResourceSetType(String name) {
-        Class resourceSetTypeClass = loadClass('org.apache.catalina.WebResourceRoot$ResourceSetType')
+        final Class resourceSetTypeClass = loadClass('org.apache.catalina.WebResourceRoot$ResourceSetType')
         resourceSetTypeClass.enumConstants.find { it.name() == name }
     }
 }
