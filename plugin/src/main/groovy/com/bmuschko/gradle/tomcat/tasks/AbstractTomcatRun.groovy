@@ -198,6 +198,10 @@ abstract class AbstractTomcatRun extends Tomcat {
     @Input
     String ajpProtocol = 'org.apache.coyote.ajp.AjpProtocol'
 
+    @Input
+    @Optional
+    Integer cacheSize = 0
+
     /**
      * The list of Tomcat users. Defaults to an empty list.
      */
@@ -307,6 +311,14 @@ abstract class AbstractTomcatRun extends Tomcat {
     protected void configureWebApplication() {
         setWebApplicationContext()
         server.createLoader(Thread.currentThread().contextClassLoader)
+
+        if (getCacheSize() != 0) { // only config cacheSize when cacheSize!=0
+            if(server.metaClass.respondsTo(server, "setResourcesCacheSize", getCacheSize())){
+                server.metaClass.invokeMethod(server,"setResourcesCacheSize", getCacheSize())
+            } else {
+                logger.warn("CacheSize setting only support tomcat 8+")
+            }
+        }
 
         logger.info "Additional runtime resources classpath = ${getAdditionalRuntimeResources()}"
 
